@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>Password Crossword</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+</head>
+<body>
+
+<table id="pass_cross"></table>
+
+<form onsubmit="return processFormSubmission()" id="settings" name="settings">
+    <label for="set_width">Width: </label> <input type="number" id="set_width" size="3">
+    <label for="set_height">Height: </label><input type="number" id="set_height" size="3">
+    <input type="submit">
+</form>
+
+<script>
+    getSettingsFromQuery();
+    set("set_width", global_settings.size_w)
+    set("set_height", global_settings.size_h)
+    generatePasswordTable(global_settings.size_w, global_settings.size_h)
+
+</script>
+
+</body>
+</html>

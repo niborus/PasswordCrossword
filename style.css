@@ -1,0 +1,39 @@
+@import url(https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/fira_code.css);
+
+body {
+    font-size: 16px;
+}
+
+#pass_cross {
+    font-family: 'Fira Code', monospace;
+    border-style: solid;
+    border-color: black;
+    border-width: medium;
+    border-collapse: collapse;
+    margin-bottom: 2em;
+}
+
+.password_cell {
+    min-width: 16px;
+    min-height: 16px;
+    padding: 3px;
+    text-align: center;
+    border-width: 0;
+}
+
+.left-header {
+    text-align: right;
+    border-right: medium black solid;
+}
+
+.passwordChar {
+}
+
+.top-header {
+    border-bottom: medium black solid;
+    padding-bottom: 1px;
+}
+
+.column-odd {
+    background-color: #e5e5e5;
+}
