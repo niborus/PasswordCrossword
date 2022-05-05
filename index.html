@@ -22,21 +22,33 @@
         var row = (i === -1) ? document.createElement('thead') : document.createElement('tr');
         table.appendChild(row);
 
+        row.className = `row-${even(i)}`
+
         for (let j = -1; j < tw; j++) {
+
+            let cell_classes = ["password_cell"]
+
             var cell = document.createElement('td');
             row.appendChild(cell)
 
             if (i === -1) {
                 if (j !== -1) {
-                    cell.innerText = j.toLocaleString();
+                    cell.innerText = String.fromCharCode(0x41 + (j % 26))
+                    cell_classes.push("top-header");
+                } else {
+                    cell_classes.push("top-header", "left-header");
                 }
             } else {
                 if (j === -1) {
                     cell.innerText = i.toLocaleString();
+                    cell_classes.push("left-header");
                 } else {
+                    cell_classes.push(`passwordChar column-${even(j)}`, `row-${even(i)}`);
                     cell.innerText = password.charAt(i*tw+j);
                 }
             }
+
+            cell.className = cell_classes.join(" ")
         }
     }
 

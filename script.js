@@ -36,11 +36,17 @@ function rand_string(str_len = 32) {
             // Can not use this value, as it would unbalance probability
             continue
         }
-
         string_to_return += allowedChars.charAt(randomUInt32 % allowedChars.length)
-
     }
-
     return string_to_return;
+}
 
+/**
+ * Returns "even" if i is even, "odd" otherwise.
+ *
+ * @param {number} i Number to check.
+ * @returns {string} "even" or "odd"
+ */
+function even(i) {
+    return `${(i%2===0) ? "even" : "odd"}`
 }
