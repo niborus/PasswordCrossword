@@ -4,7 +4,7 @@
 <title>Password Crossword</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="stylesheet" href="style.css">
-<script src=""></script>
+<script src="script.js"></script>
 <body>
 
 <table id="pass_cross">
@@ -16,26 +16,28 @@
 
     let table = document.getElementById("pass_cross");
 
-    for (let i = 0; i <= th; i++) {
-        var row = (i === 0) ? document.createElement('thead') : document.createElement('tr');
+    let password = rand_string(tw*th)
+
+    for (let i = -1; i < th; i++) {
+        var row = (i === -1) ? document.createElement('thead') : document.createElement('tr');
         table.appendChild(row);
 
-        for (let j = 0; j <= tw; j++) {
+        for (let j = -1; j < tw; j++) {
             var cell = document.createElement('td');
             row.appendChild(cell)
 
-            if (i === 0) {
-                if (j !== 0) {
+            if (i === -1) {
+                if (j !== -1) {
                     cell.innerText = j.toLocaleString();
                 }
             } else {
-                if (j === 0) {
+                if (j === -1) {
                     cell.innerText = i.toLocaleString();
+                } else {
+                    cell.innerText = password.charAt(i*tw+j);
                 }
             }
-
         }
-
     }
 
 </script>
