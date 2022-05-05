@@ -10,6 +10,7 @@ body {
     border-color: black;
     border-width: medium;
     border-collapse: collapse;
+    margin-bottom: 2em;
 }
 
 .password_cell {
