@@ -112,6 +112,42 @@ function getSettingsFromQuery() {
 }
 
 /**
+ * Returns the base 26 logarithm of a number
+ *
+ * @param {number} base The base of the expression.
+ * @param {number} x A numeric expression.
+ * @return {number}
+ */
+function log_n(base, x) {
+    return Math.log(x) / Math.log(base);
+}
+
+/**
+ * Returns the size of characters, a number has in a specific base.
+ *
+ * @param {number} base The base of the expression.
+ * @param {number} x A numeric expression.
+ * @return {number}
+ */
+function size_in_base(base, x) {
+    return Math.floor(log_n(base, x)) +1
+}
+
+function base_26_number(padding, x) {
+    let rest_padding = padding;
+    let rest = x;
+    let m = 0;
+    let result = "";
+    while (rest > 0 || rest_padding > 0) {
+        m = rest % 26;
+        rest = Math.floor(rest/26);
+        result = String.fromCharCode(0x41 + m) + result
+        rest_padding--;
+    }
+    return result
+}
+
+/**
  * Generates a new Password-Table.
  *
  * Looks for the Table #pass_cross and will
@@ -125,6 +161,7 @@ function getSettingsFromQuery() {
 function generatePasswordTable(tw, th) {
     //Get Table from index.html
     let table = document.getElementById("pass_cross");
+    let top_header_size = log_n(26, tw);
 
     // Clear old table, if it existed before.
     table.innerHTML = ""
@@ -148,8 +185,11 @@ function generatePasswordTable(tw, th) {
 
             if (i === -1) {
                 if (j !== -1) {
-                    cell.innerText = String.fromCharCode(0x41 + (j % 26))
+                    cell.innerText = base_26_number(top_header_size, j);
                     cell_classes.push("top-header");
+                    if (top_header_size > 1) {
+                        cell_classes.push(`column-${even(j)}`)
+                    }
                 } else {
                     cell_classes.push("top-header", "left-header");
                 }
