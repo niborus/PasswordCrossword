@@ -6,13 +6,15 @@ const alphanumeric = alphabet + digits;
 
 let global_settings = {
     size_w: 20,
-    size_h: 20
+    size_h: 20,
+    extended_charset: "!\"§$%&/()=?*+'#,.-:_<>",
 }
 
 /**
  * Creates a cryptographic random string.
  *
  * Creates a cryptographic random with the length of the given input.
+ * By design, this could return valid HTML code. It is unlikely, but possible.
  *
  * @param {number} str_len The Length of the string to return.
  * @returns {string} A cryptographic random string.
@@ -20,7 +22,7 @@ let global_settings = {
 function rand_string(str_len = 32) {
 
     // Settings
-    const allowedChars = alphanumeric;
+    const allowedChars = alphanumeric + global_settings.extended_charset;
     const randomArrayLength = 2;
 
     // Variables and Constants defined at runtime
@@ -70,6 +72,7 @@ function writeSettingsToQuery() {
     let currentQuery = new URLSearchParams(window.location.search);
     currentQuery.set("size_height", global_settings.size_h);
     currentQuery.set("size_width", global_settings.size_w);
+    currentQuery.set("global_charset", global_settings.extended_charset);
 
     window.history.pushState("", "", "?"+currentQuery.toString());
 }
@@ -78,6 +81,7 @@ function processFormSubmission(){
 
     global_settings.size_h = document.getElementById("set_height").value;
     global_settings.size_w = document.getElementById("set_width").value;
+    global_settings.extended_charset = document.getElementById("extended_charset").value;
 
     writeSettingsToQuery();
     generatePasswordTable(global_settings.size_w, global_settings.size_h);
@@ -104,6 +108,7 @@ function getSettingsFromQuery() {
     });
     global_settings.size_h = safe_int(params.size_height) || global_settings.size_h;
     global_settings.size_w = safe_int(params.size_width)  || global_settings.size_w;
+    global_settings.extended_charset = (params.extended_charset !== null) ? params.extended_charset : global_settings.extended_charset
 }
 
 /**
