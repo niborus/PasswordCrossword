@@ -6,13 +6,15 @@ const alphanumeric = alphabet + digits;
 
 let global_settings = {
     size_w: 20,
-    size_h: 20
+    size_h: 20,
+    extended_charset: "!\"§$%&/()=?*+'#,.-:_<>",
 }
 
 /**
  * Creates a cryptographic random string.
  *
  * Creates a cryptographic random with the length of the given input.
+ * By design, this could return valid HTML code. It is unlikely, but possible.
  *
  * @param {number} str_len The Length of the string to return.
  * @returns {string} A cryptographic random string.
@@ -20,7 +22,7 @@ let global_settings = {
 function rand_string(str_len = 32) {
 
     // Settings
-    const allowedChars = alphanumeric;
+    const allowedChars = alphanumeric + global_settings.extended_charset;
     const randomArrayLength = 2;
 
     // Variables and Constants defined at runtime
@@ -70,6 +72,7 @@ function writeSettingsToQuery() {
     let currentQuery = new URLSearchParams(window.location.search);
     currentQuery.set("size_height", global_settings.size_h);
     currentQuery.set("size_width", global_settings.size_w);
+    currentQuery.set("global_charset", global_settings.extended_charset);
 
     window.history.pushState("", "", "?"+currentQuery.toString());
 }
@@ -78,6 +81,7 @@ function processFormSubmission(){
 
     global_settings.size_h = document.getElementById("set_height").value;
     global_settings.size_w = document.getElementById("set_width").value;
+    global_settings.extended_charset = document.getElementById("extended_charset").value;
 
     writeSettingsToQuery();
     generatePasswordTable(global_settings.size_w, global_settings.size_h);
@@ -104,6 +108,43 @@ function getSettingsFromQuery() {
     });
     global_settings.size_h = safe_int(params.size_height) || global_settings.size_h;
     global_settings.size_w = safe_int(params.size_width)  || global_settings.size_w;
+    global_settings.extended_charset = (params.extended_charset !== null) ? params.extended_charset : global_settings.extended_charset
+}
+
+/**
+ * Returns the base 26 logarithm of a number
+ *
+ * @param {number} base The base of the expression.
+ * @param {number} x A numeric expression.
+ * @return {number}
+ */
+function log_n(base, x) {
+    return Math.log(x) / Math.log(base);
+}
+
+/**
+ * Returns the size of characters, a number has in a specific base.
+ *
+ * @param {number} base The base of the expression.
+ * @param {number} x A numeric expression.
+ * @return {number}
+ */
+function size_in_base(base, x) {
+    return Math.floor(log_n(base, x)) +1
+}
+
+function base_26_number(padding, x) {
+    let rest_padding = padding;
+    let rest = x;
+    let m = 0;
+    let result = "";
+    while (rest > 0 || rest_padding > 0) {
+        m = rest % 26;
+        rest = Math.floor(rest/26);
+        result = String.fromCharCode(0x41 + m) + result
+        rest_padding--;
+    }
+    return result
 }
 
 /**
@@ -120,6 +161,7 @@ function getSettingsFromQuery() {
 function generatePasswordTable(tw, th) {
     //Get Table from index.html
     let table = document.getElementById("pass_cross");
+    let top_header_size = log_n(26, tw);
 
     // Clear old table, if it existed before.
     table.innerHTML = ""
@@ -143,8 +185,11 @@ function generatePasswordTable(tw, th) {
 
             if (i === -1) {
                 if (j !== -1) {
-                    cell.innerText = String.fromCharCode(0x41 + (j % 26))
+                    cell.innerText = base_26_number(top_header_size, j);
                     cell_classes.push("top-header");
+                    if (top_header_size > 1) {
+                        cell_classes.push(`column-${even(j)}`)
+                    }
                 } else {
                     cell_classes.push("top-header", "left-header");
                 }
