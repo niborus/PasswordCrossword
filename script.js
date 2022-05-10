@@ -10,6 +10,33 @@ let global_settings = {
     extended_charset: "!\"§$%&/()=?*+'#,.-:_<>",
 }
 
+const UINT32MAX = 4294967295
+
+/**
+ * Returns a cryptographic secure random UInt32
+ *
+ * @return {number} random UInt32
+ */
+function randU32() {
+    let randomNumberArray = new Uint32Array(1);
+    self.crypto.getRandomValues(randomNumberArray);
+    return randomNumberArray[0]
+}
+
+/**
+ * Returns a random number smaller than i
+ *
+ * @param {number} i
+ */
+function rand_smaller_than(i) {
+    const offBoundary = Math.floor((UINT32MAX)/i) * i
+    let random_u32 = 0;
+    do {
+        random_u32 = randU32();
+    } while (random_u32 >= offBoundary);
+    return  random_u32 % i
+}
+
 /**
  * Creates a cryptographic random string.
  *
@@ -29,7 +56,7 @@ function rand_string(str_len = 32) {
     let string_to_return = "";
     let randomNumbers = new Uint32Array(randomArrayLength);
     let randomNumbersCounter = randomArrayLength;
-    const offBoundary = Math.floor((4294967295)/allowedChars.length) * allowedChars.length
+    const offBoundary = Math.floor((UINT32MAX)/allowedChars.length) * allowedChars.length
 
     while (string_to_return.length < str_len) {
         if (randomNumbersCounter >= randomArrayLength) {
@@ -46,6 +73,26 @@ function rand_string(str_len = 32) {
         string_to_return += allowedChars.charAt(randomUInt32 % allowedChars.length)
     }
     return string_to_return;
+}
+
+/**
+ * Shuffles an array.
+ *
+ * Uses Fisher–Yates shuffle https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+ *
+ * @param {any[]} seq
+ * @return {any[]}
+ */
+function shuffle(seq) {
+    for (let i = seq.length-1; i >= 1; i--) {
+        let j = rand_smaller_than(i+1)
+
+        // Exchange seq[i] and sqe[j]
+        let tmp = seq[i];
+        seq[i] = seq[j];
+        seq[j] = tmp;
+    }
+    return seq;
 }
 
 /**
@@ -176,6 +223,7 @@ function generatePasswordTable(tw, th) {
 
         row.className = `row-${even(i)}`
 
+        // Generate basic password table
         for (let j = -1; j < tw; j++) {
 
             let cell_classes = ["password_cell"]
@@ -198,13 +246,25 @@ function generatePasswordTable(tw, th) {
                     cell.innerText = i.toLocaleString();
                     cell_classes.push("left-header");
                 } else {
-                    cell_classes.push(`passwordChar column-${even(j)}`, `row-${even(i)}`);
+                    cell_classes.push(`passwordChar`, `column-${even(j)}`, `row-${even(i)}`);
+                    cell.id = `passwordChar-${i}-${j}`
                     cell.innerText = password.charAt(i*tw+j);
                 }
             }
 
             cell.className = cell_classes.join(" ")
         }
+
     }
 }
 
+function emojis(tw, th) {
+    // Generates Emojis in table
+    const emoji_position_x = shuffle([...Array(tw).keys()]);
+    const emoji_position_y = shuffle([...Array(th).keys()]);
+
+    for (let i = 0; i < Math.max(tw, th); i++) {
+        document.getElementById(`passwordChar-${emoji_position_x[i]}-${emoji_position_y[i]}`)
+            .innerText = "🌈"
+    }
+}
