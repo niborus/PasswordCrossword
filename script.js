@@ -5,9 +5,36 @@ const digits = "0123456789";
 const alphanumeric = alphabet + digits;
 
 let global_settings = {
-    size_w: 20,
-    size_h: 20,
+    size_w: 18,
+    size_h: 18,
     extended_charset: "!\"§$%&/()=?*+'#,.-:_<>",
+}
+
+const UINT32MAX = 4294967295
+
+/**
+ * Returns a cryptographic secure random UInt32
+ *
+ * @return {number} random UInt32
+ */
+function randU32() {
+    let randomNumberArray = new Uint32Array(1);
+    self.crypto.getRandomValues(randomNumberArray);
+    return randomNumberArray[0]
+}
+
+/**
+ * Returns a random number smaller than i
+ *
+ * @param {number} i
+ */
+function rand_smaller_than(i) {
+    const offBoundary = Math.floor((UINT32MAX)/i) * i
+    let random_u32 = 0;
+    do {
+        random_u32 = randU32();
+    } while (random_u32 >= offBoundary);
+    return  random_u32 % i
 }
 
 /**
@@ -29,7 +56,7 @@ function rand_string(str_len = 32) {
     let string_to_return = "";
     let randomNumbers = new Uint32Array(randomArrayLength);
     let randomNumbersCounter = randomArrayLength;
-    const offBoundary = Math.floor((4294967295)/allowedChars.length) * allowedChars.length
+    const offBoundary = Math.floor((UINT32MAX)/allowedChars.length) * allowedChars.length
 
     while (string_to_return.length < str_len) {
         if (randomNumbersCounter >= randomArrayLength) {
@@ -46,6 +73,26 @@ function rand_string(str_len = 32) {
         string_to_return += allowedChars.charAt(randomUInt32 % allowedChars.length)
     }
     return string_to_return;
+}
+
+/**
+ * Shuffles an array.
+ *
+ * Uses Fisher–Yates shuffle https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#The_modern_algorithm
+ *
+ * @param {any[]} seq
+ * @return {any[]}
+ */
+function shuffle(seq) {
+    for (let i = seq.length-1; i >= 1; i--) {
+        let j = rand_smaller_than(i+1)
+
+        // Exchange seq[i] and sqe[j]
+        let tmp = seq[i];
+        seq[i] = seq[j];
+        seq[j] = tmp;
+    }
+    return seq;
 }
 
 /**
@@ -77,14 +124,16 @@ function writeSettingsToQuery() {
     window.history.pushState("", "", "?"+currentQuery.toString());
 }
 
-function processFormSubmission(){
+function processFormSubmission(event){
+    event.preventDefault()
 
-    global_settings.size_h = document.getElementById("set_height").value;
-    global_settings.size_w = document.getElementById("set_width").value;
+    global_settings.size_h = parseInt(document.getElementById("set_height").value);
+    global_settings.size_w = parseInt(document.getElementById("set_width").value);
     global_settings.extended_charset = document.getElementById("extended_charset").value;
 
     writeSettingsToQuery();
     generatePasswordTable(global_settings.size_w, global_settings.size_h);
+    add_emojis_to_table(global_settings.size_w, global_settings.size_h);
 
     return false;
 }
@@ -176,6 +225,7 @@ function generatePasswordTable(tw, th) {
 
         row.className = `row-${even(i)}`
 
+        // Generate basic password table
         for (let j = -1; j < tw; j++) {
 
             let cell_classes = ["password_cell"]
@@ -198,13 +248,52 @@ function generatePasswordTable(tw, th) {
                     cell.innerText = i.toLocaleString();
                     cell_classes.push("left-header");
                 } else {
-                    cell_classes.push(`passwordChar column-${even(j)}`, `row-${even(i)}`);
+                    cell_classes.push(`passwordChar`, `column-${even(j)}`, `row-${even(i)}`);
+                    cell.id = `passwordChar-${i}-${j}`
                     cell.innerText = password.charAt(i*tw+j);
                 }
             }
 
             cell.className = cell_classes.join(" ")
         }
+
     }
 }
 
+/**
+ * Gets all numbers from 0 to n (excluding) in a shuffled order
+ * @param {number} n The length of the array.
+ * @return Array
+ */
+function shuffled_sequence(n) {
+    console.log(n)
+    return shuffle([...Array(n).keys()])
+}
+
+let emojis_template = Array.from("🧯🌪📯🔥🔪🛒🔒⚽🍓🥗🖊⏰🧪🕯📹🎁🐳🐍🎃♥🌘📍🎣💎🚽🌡🎄" +
+    "🥐🐓👖🚦🪁🥋🕌🧴🪗⛺🎙👜🚝🎵🔮🔧🪃📫✂🍭🥦🛵✈🚤⛲🌩☂🌈")
+
+function add_emojis_to_table(tw, th) {
+
+    let max_length = Math.max(tw, th)*2;
+
+    let emoji_position_x = []
+    let emoji_position_y = []
+
+    while (emoji_position_x.length < max_length) {
+        emoji_position_x = emoji_position_x.concat(shuffled_sequence(tw))
+    }
+    while (emoji_position_y.length < max_length) {
+        emoji_position_y = emoji_position_y.concat(shuffled_sequence(th))
+    }
+    let emojis = [];
+    while (emojis.length < max_length) {
+        emojis = emojis.concat(shuffle(emojis_template))
+    }
+
+    for (let i = 0; i < max_length; i++) {
+        document.getElementById(`passwordChar-${emoji_position_y[i]}-${emoji_position_x[i]}`)
+            .innerText = emojis[i]
+    }
+    twemoji.parse(document.body, {folder: 'svg', ext: '.svg'})
+}
