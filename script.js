@@ -5,8 +5,8 @@ const digits = "0123456789";
 const alphanumeric = alphabet + digits;
 
 let global_settings = {
-    size_w: 20,
-    size_h: 20,
+    size_w: 18,
+    size_h: 18,
     extended_charset: "!\"§$%&/()=?*+'#,.-:_<>",
 }
 
@@ -124,14 +124,16 @@ function writeSettingsToQuery() {
     window.history.pushState("", "", "?"+currentQuery.toString());
 }
 
-function processFormSubmission(){
+function processFormSubmission(event){
+    event.preventDefault()
 
-    global_settings.size_h = document.getElementById("set_height").value;
-    global_settings.size_w = document.getElementById("set_width").value;
+    global_settings.size_h = parseInt(document.getElementById("set_height").value);
+    global_settings.size_w = parseInt(document.getElementById("set_width").value);
     global_settings.extended_charset = document.getElementById("extended_charset").value;
 
     writeSettingsToQuery();
     generatePasswordTable(global_settings.size_w, global_settings.size_h);
+    add_emojis_to_table(global_settings.size_w, global_settings.size_h);
 
     return false;
 }
@@ -258,13 +260,40 @@ function generatePasswordTable(tw, th) {
     }
 }
 
-function emojis(tw, th) {
-    // Generates Emojis in table
-    const emoji_position_x = shuffle([...Array(tw).keys()]);
-    const emoji_position_y = shuffle([...Array(th).keys()]);
+/**
+ * Gets all numbers from 0 to n (excluding) in a shuffled order
+ * @param {number} n The length of the array.
+ * @return Array
+ */
+function shuffled_sequence(n) {
+    console.log(n)
+    return shuffle([...Array(n).keys()])
+}
 
-    for (let i = 0; i < Math.max(tw, th); i++) {
-        document.getElementById(`passwordChar-${emoji_position_x[i]}-${emoji_position_y[i]}`)
-            .innerText = "🌈"
+let emojis_template = Array.from("🧯🌪📯🔥🔪🛒🔒⚽🍓🥗🖊⏰🧪🕯📹🎁🐳🐍🎃♥🌘📍🎣💎🚽🌡🎄" +
+    "🥐🐓👖🚦🪁🥋🕌🧴🪗⛺🎙👜🚝🎵🔮🔧🪃📫✂🍭🥦🛵✈🚤⛲🌩☂🌈")
+
+function add_emojis_to_table(tw, th) {
+
+    let max_length = Math.max(tw, th)*2;
+
+    let emoji_position_x = []
+    let emoji_position_y = []
+
+    while (emoji_position_x.length < max_length) {
+        emoji_position_x = emoji_position_x.concat(shuffled_sequence(tw))
     }
+    while (emoji_position_y.length < max_length) {
+        emoji_position_y = emoji_position_y.concat(shuffled_sequence(th))
+    }
+    let emojis = [];
+    while (emojis.length < max_length) {
+        emojis = emojis.concat(shuffle(emojis_template))
+    }
+
+    for (let i = 0; i < max_length; i++) {
+        document.getElementById(`passwordChar-${emoji_position_y[i]}-${emoji_position_x[i]}`)
+            .innerText = emojis[i]
+    }
+    twemoji.parse(document.body, {folder: 'svg', ext: '.svg'})
 }
