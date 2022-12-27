@@ -275,23 +275,25 @@ let emojis_template = Array.from("🧯🌪📯🔥🔪🛒🔒⚽🍓🥗🖊⏰
 
 function add_emojis_to_table(tw, th) {
 
-    let max_length = Math.max(tw, th)*2;
+    // This is one Emoji for each row/column on the long side.
+    // If the short side is bigger than 12, multiple Emojis for each row/column on the long side.
+    let emoji_count = Math.max(tw, th)*(1+Math.floor(Math.min(tw, th) / 12));
 
     let emoji_position_x = []
     let emoji_position_y = []
 
-    while (emoji_position_x.length < max_length) {
+    while (emoji_position_x.length < emoji_count) {
         emoji_position_x = emoji_position_x.concat(shuffled_sequence(tw))
     }
-    while (emoji_position_y.length < max_length) {
+    while (emoji_position_y.length < emoji_count) {
         emoji_position_y = emoji_position_y.concat(shuffled_sequence(th))
     }
     let emojis = [];
-    while (emojis.length < max_length) {
+    while (emojis.length < emoji_count) {
         emojis = emojis.concat(shuffle(emojis_template))
     }
 
-    for (let i = 0; i < max_length; i++) {
+    for (let i = 0; i < emoji_count; i++) {
         document.getElementById(`passwordChar-${emoji_position_y[i]}-${emoji_position_x[i]}`)
             .innerText = emojis[i]
     }
