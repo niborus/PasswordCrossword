@@ -16,7 +16,14 @@
 <form id="settings" name="settings" action="#" method="get">
     <label for="set_width">Width: </label> <input type="number" id="set_width" size="3" min="1">
     <label for="set_height">Height: </label><input type="number" id="set_height" size="3" min="1"> <br />
-    <label for="extended_charset">Extended Charset: </label><input type="text" id="extended_charset" size="40">
+    <label for="extended_charset">Extended Charset: </label><input type="text" id="extended_charset" size="40"><br />
+    <label for="charset_override">Charset Override: </label>
+    <select name="charset_override" id="charset_override">
+        <option value="none" selected>None</option>
+        <option value="us-de-typesafe">Us/De - Typesafe</option>
+        <option value="us-de-typesafe-small">Us/De - Typesafe, Small Only</option>
+        <option value="de-small">De, Small Only</option>
+    </select>
     <p id="information_on_bg_print">
         If you intend to print the background colour of the table,
         enable <i>Background Graphics</i> or <i>Print Background</i>
@@ -34,6 +41,7 @@
     set("set_width", global_settings.size_w)
     set("set_height", global_settings.size_h)
     set("extended_charset", global_settings.extended_charset)
+    set("charset_override", global_settings.charset_override)
     generatePasswordTable(global_settings.size_w, global_settings.size_h)
     add_emojis_to_table(global_settings.size_w, global_settings.size_h)
 </script>

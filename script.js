@@ -8,7 +8,13 @@ let global_settings = {
     size_w: 18,
     size_h: 18,
     extended_charset: "!\"§$%&/()=?*+'#,.-:_<>",
+    charset_override: "none"
 }
+
+const alternative_alphabets = new Map()
+alternative_alphabets.set("us-de-typesafe", "abcdefghijklmnopqrstuvwxABCDEFGHIJKLMNOPQRSTUVWX0123456789!$%,.!$%,.!$%,.")
+alternative_alphabets.set("us-de-typesafe-small", "abcdefghijklmnopqrstuvwx0123456789,.,.")
+alternative_alphabets.set("de-small", "abcdefghijklmnopqrstuvwxyzäöüß0123456789,.-#+<")
 
 const UINT32MAX = 4294967295
 
@@ -49,7 +55,12 @@ function rand_smaller_than(i) {
 function rand_string(str_len = 32) {
 
     // Settings
-    const allowedChars = alphanumeric + global_settings.extended_charset;
+    let allowedChars;
+    if (global_settings.charset_override && alternative_alphabets.has(global_settings.charset_override)) {
+        allowedChars = alternative_alphabets.get(global_settings.charset_override)
+    } else {
+        allowedChars = alphanumeric + global_settings.extended_charset;
+    }
     const randomArrayLength = 2;
 
     // Variables and Constants defined at runtime
@@ -112,6 +123,7 @@ function even(i) {
  * @param {any} value The Value
  */
 function set (element_id, value) {
+    console.log(element_id, value)
     document.getElementById(element_id).value = value;
 }
 
@@ -120,6 +132,7 @@ function writeSettingsToQuery() {
     currentQuery.set("size_height", global_settings.size_h);
     currentQuery.set("size_width", global_settings.size_w);
     currentQuery.set("global_charset", global_settings.extended_charset);
+    currentQuery.set("charset_override", global_settings.charset_override);
 
     window.history.pushState("", "", "?"+currentQuery.toString());
 }
@@ -130,6 +143,7 @@ function processFormSubmission(event){
     global_settings.size_h = parseInt(document.getElementById("set_height").value);
     global_settings.size_w = parseInt(document.getElementById("set_width").value);
     global_settings.extended_charset = document.getElementById("extended_charset").value;
+    global_settings.charset_override = document.getElementById("charset_override").value;
 
     writeSettingsToQuery();
     generatePasswordTable(global_settings.size_w, global_settings.size_h);
@@ -158,6 +172,7 @@ function getSettingsFromQuery() {
     global_settings.size_h = safe_int(params.size_height) || global_settings.size_h;
     global_settings.size_w = safe_int(params.size_width)  || global_settings.size_w;
     global_settings.extended_charset = (params.extended_charset !== null) ? params.extended_charset : global_settings.extended_charset
+    global_settings.charset_override = (params.charset_override !== null && params.charset_override !== "none") ? params.charset_override : global_settings.charset_override
 }
 
 /**
